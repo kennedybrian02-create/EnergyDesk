@@ -1,0 +1,9 @@
+{
+  "appId": "ie.energy.celticgbdesk",
+  "appName": "Celtic & GB Energy Desk",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

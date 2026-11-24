@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b101b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Celtic & GB Energy Desk | CCO Market Intelligence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      background-color: #090d16;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #0f172a; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-30 border-b border-slate-800/90 bg-[#0b101b]/95 backdrop-blur-md">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:h-16 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i data-lucide="zap" class="w-5 h-5 text-slate-950 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">Celtic &amp; GB Energy Desk</h1>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              CCO Edition
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden md:block">I-SEM &amp; GB Power, Gas, BESS Arbitrage &amp; Policy Intelligence</p>
+        </div>
+      </div>
+
+      <!-- Daily Sync Button (Mobile Top Right) -->
+      <div class="flex items-center gap-3 sm:order-3">
+        <div class="hidden xl:flex flex-col items-end text-right">
+          <span class="text-[11px] text-slate-400">Daily Feed Sync</span>
+          <span id="last-sync-time" class="text-xs font-medium text-emerald-400 tabular-nums">07:30 GMT • Live</span>
+        </div>
+        <button id="refresh-btn" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors">
+          <i data-lucide="refresh-cw" id="refresh-icon" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+
+      <!-- View Switcher -->
+      <nav class="w-full sm:w-auto sm:order-2 flex items-center justify-between sm:justify-start bg-slate-900/90 p-1 rounded-lg border border-slate-800 overflow-x-auto" id="view-switcher">
+        <button data-view="all" class="view-btn flex-1 sm:flex-initial px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-slate-800 text-white shadow-sm whitespace-nowrap">
+          Full Desk
+        </button>
+        <button data-view="commodities" class="view-btn flex-1 sm:flex-initial px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-slate-200 whitespace-nowrap">
+          Commodities
+        </button>
+        <button data-view="news" class="view-btn flex-1 sm:flex-initial px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-slate-200 whitespace-nowrap">
+          Industry News
+        </button>
+        <button data-view="regulation" class="view-btn flex-1 sm:flex-initial px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-slate-200 whitespace-nowrap">
+          Regulation
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-6 pb-12">
+
+    <!-- COMMODITIES SECTION -->
+    <section id="commodities-section" class="space-y-5">
+      <!-- 4 Commodity KPI Ticker Cards -->
+      <div id="kpi-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+      <!-- Context-Sensitive Regional Grid Telemetry Banner -->
+      <div id="grid-telemetry-banner"></div>
+
+      <!-- Interactive Price Curve & Wind/Solar Overlay Panel -->
+      <div class="rounded-xl bg-[#0e1525] border border-slate-800/90 p-4 sm:p-5 shadow-xl">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+          <div>
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <h2 id="chart-title" class="text-base sm:text-lg font-bold text-white">SEMOpx Day-Ahead Baseload Curve</h2>
+              <span id="chart-badge" class="px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                I-SEM Auction
+              </span>
+            </div>
+            <p id="chart-subtitle" class="text-xs text-slate-400 mt-1">Hourly clearing profile (€/MWh) with All-Island Wind &amp; Solar generation overlay</p>
+          </div>
+
+          <!-- Chart Controls -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Timeframe Toggle -->
+            <div class="inline-flex rounded-lg bg-slate-900 p-1 border border-slate-800">
+              <button id="tf-intraday" class="px-2.5 py-1 rounded text-xs font-medium bg-slate-800 text-white">Intraday (24h)</button>
+              <button id="tf-7d" class="px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200">7-Day Trend</button>
+            </div>
+
+            <!-- Wind/Solar Overlay Toggle -->
+            <button id="toggle-wind" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-sky-500/15 text-sky-300 border-sky-500/30 transition-colors">
+              <i data-lucide="wind" class="w-3.5 h-3.5"></i>
+              <span>Wind &amp; Solar Overlay</span>
+            </button>
+
+            <!-- SEMOpx vs EPEX Compare Toggle -->
+            <button id="toggle-compare" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200 transition-colors">
+              <i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i>
+              <span>Compare SEMOpx vs EPEX</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SVG Interactive Chart Area -->
+        <div class="mt-5 relative">
+          <div id="chart-container" class="w-full overflow-x-auto scrollbar-thin"></div>
+          <!-- Hover / Tap Tooltip -->
+          <div id="chart-tooltip" class="hidden pointer-events-none absolute z-20 bg-slate-950/95 border border-slate-700 rounded-lg p-3 shadow-2xl text-xs min-w-[190px]"></div>
+        </div>
+
+        <!-- Chart Legend & BESS Arbitrage Metrics -->
+        <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-400">
+          <div id="chart-legend" class="flex flex-wrap items-center gap-4"></div>
+          <div id="bess-spread-summary" class="flex flex-wrap items-center gap-4 text-slate-300 font-medium tabular-nums"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTELLIGENCE & REGULATION FEED SECTION -->
+    <section id="intelligence-section" class="space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 id="feed-heading" class="text-lg font-bold text-white flex items-center gap-2">
+            <i data-lucide="newspaper" class="w-5 h-5 text-emerald-400"></i>
+            <span>CCO Market &amp; Regulatory Intelligence</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Curated daily deal flow, grid code updates, and BESS/renewable policy across Ireland &amp; GB</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Region Filter -->
+          <div class="inline-flex rounded-lg bg-slate-900 p-1 border border-slate-800" id="region-filters">
+            <button data-region="ALL" class="region-btn px-2.5 py-1 rounded text-xs font-medium bg-slate-800 text-white">All Regions</button>
+            <button data-region="IE" class="region-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200">Ireland (SEM)</button>
+            <button data-region="GB" class="region-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200">Great Britain</button>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="inline-flex rounded-lg bg-slate-900 p-1 border border-slate-800" id="category-filters">
+            <button data-cat="ALL" class="cat-btn px-2.5 py-1 rounded text-xs font-medium bg-slate-800 text-white">All Topics</button>
+            <button data-cat="Policy" class="cat-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200">Policy &amp; Reg</button>
+            <button data-cat="M&A" class="cat-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200">M&amp;A</button>
+            <button data-cat="Development" class="cat-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200">Development</button>
+          </div>
+
+          <!-- Saved Briefcase Filter -->
+          <button id="saved-filter-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200 transition-colors">
+            <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
+            <span>Briefcase (<span id="saved-count">0</span>)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cards Grid -->
+      <div id="intelligence-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+  </main>
+
+  <!-- Executive Briefing Modal -->
+  <div id="briefing-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0e1525] border border-slate-700/90 shadow-2xl">
+      <div class="p-5 sm:p-6 space-y-5">
+        <!-- Modal Header -->
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center gap-2 flex-wrap" id="modal-badges"></div>
+          <button id="close-modal-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div>
+          <h3 id="modal-title" class="text-lg sm:text-xl font-bold text-white leading-snug"></h3>
+          <p id="modal-meta" class="text-xs text-slate-400 mt-1.5"></p>
+        </div>
+
+        <!-- Executive Summary -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Market Context &amp; Summary</h4>
+          <p id="modal-context" class="text-sm text-slate-300 leading-relaxed"></p>
+        </div>
+
+        <!-- CCO Desk Takeaway -->
+        <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-1.5">
+          <div class="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+            <i data-lucide="target" class="w-4 h-4"></i>
+            <span>CCO Commercial &amp; Trading Desk Takeaway</span>
+          </div>
+          <p id="modal-takeaway" class="text-sm text-emerald-100/90 leading-relaxed"></p>
+        </div>
+
+        <!-- Direct Source Link Box -->
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <span class="text-[11px] font-medium text-slate-400 block">Primary Source Publication</span>
+            <a id="modal-url-link" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-sky-400 hover:text-sky-300 underline truncate block mt-0.5"></a>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button id="copy-url-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span id="copy-url-label">Copy Link</span>
+            </button>
+            <a id="open-source-btn" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-colors shadow-lg shadow-emerald-500/20">
+              <span>Read Full Source</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- DATA MODELS ---
+    const COMMODITIES = {
+      semopx: {
+        id: 'semopx',
+        name: 'SEMOpx Day-Ahead',
+        shortName: 'SEMOpx DA',
+        market: 'I-SEM (Ireland)',
+        unit: '€/MWh',
+        price: 114.85,
+        change: +6.40,
+        changePct: +5.90,
+        peakPrice: 168.50,
+        offPeakPrice: 64.20,
+        twoHrSpread: 98.40,
+        color: '#10b981',
+        badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        subtitle: 'Hourly clearing profile (€/MWh) with EirGrid/SONI Wind & Solar telemetry',
+        intraday: [
+          { label: '00:00', price: 78.2, wind: 2850, solar: 0 },
+          { label: '02:00', price: 66.5, wind: 3120, solar: 0 },
+          { label: '04:00', price: 64.2, wind: 3290, solar: 0 },
+          { label: '06:00', price: 89.0, wind: 3050, solar: 45 },
+          { label: '08:00', price: 128.4, wind: 2640, solar: 290 },
+          { label: '10:00', price: 112.0, wind: 2410, solar: 610 },
+          { label: '12:00', price: 96.5, wind: 2280, solar: 820 },
+          { label: '14:00', price: 101.8, wind: 2150, solar: 740 },
+          { label: '16:00', price: 136.0, wind: 1920, solar: 310 },
+          { label: '18:00', price: 168.5, wind: 1740, solar: 35 },
+          { label: '20:00', price: 152.3, wind: 1890, solar: 0 },
+          { label: '22:00', price: 104.6, wind: 2240, solar: 0 }
+        ],
+        trend7d: [
+          { label: 'Wed', price: 102.4, wind: 2710, solar: 380 },
+          { label: 'Thu', price: 98.1, wind: 2940, solar: 410 },
+          { label: 'Fri', price: 106.8, wind: 2480, solar: 350 },
+          { label: 'Sat', price: 91.5, wind: 3110, solar: 440 },
+          { label: 'Sun', price: 88.9, wind: 3250, solar: 460 },
+          { label: 'Mon', price: 108.45, wind: 2390, solar: 390 },
+          { label: 'Today', price: 114.85, wind: 2465, solar: 415 }
+        ]
+      },
+      epex: {
+        id: 'epex',
+        name: 'EPEX GB Day-Ahead',
+        shortName: 'EPEX GB DA',
+        market: 'Great Britain',
+        unit: '£/MWh',
+        price: 86.40,
+        change: +3.15,
+        changePct: +3.78,
+        peakPrice: 132.80,
+        offPeakPrice: 49.60,
+        twoHrSpread: 79.20,
+        color: '#38bdf8',
+        badgeBg: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+        subtitle: 'Hourly GB clearing profile (£/MWh) with NESO Wind & Solar generation overlay',
+        intraday: [
+          { label: '00:00', price: 58.0, wind: 12400, solar: 0 },
+          { label: '02:00', price: 51.2, wind: 13600, solar: 0 },
+          { label: '04:00', price: 49.6, wind: 14100, solar: 0 },
+          { label: '06:00', price: 72.4, wind: 13200, solar: 420 },
+          { label: '08:00', price: 98.5, wind: 11800, solar: 2450 },
+          { label: '10:00', price: 84.0, wind: 10900, solar: 5600 },
+          { label: '12:00', price: 71.5, wind: 10200, solar: 7450 },
+          { label: '14:00', price: 76.8, wind: 9800, solar: 6800 },
+          { label: '16:00', price: 108.2, wind: 8900, solar: 2900 },
+          { label: '18:00', price: 132.8, wind: 8400, solar: 310 },
+          { label: '20:00', price: 116.4, wind: 9100, solar: 0 },
+          { label: '22:00', price: 79.5, wind: 10500, solar: 0 }
+        ],
+        trend7d: [
+          { label: 'Wed', price: 81.2, wind: 11400, solar: 3100 },
+          { label: 'Thu', price: 79.5, wind: 12100, solar: 3400 },
+          { label: 'Fri', price: 83.9, wind: 10800, solar: 2950 },
+          { label: 'Sat', price: 72.1, wind: 13500, solar: 3600 },
+          { label: 'Sun', price: 69.8, wind: 14200, solar: 3850 },
+          { label: 'Mon', price: 83.25, wind: 10600, solar: 3200 },
+          { label: 'Today', price: 86.40, wind: 11075, solar: 3340 }
+        ]
+      },
+      nbp: {
+        id: 'nbp',
+        name: 'ICE Front Month NBP',
+        shortName: 'ICE NBP FM',
+        market: 'UK Natural Gas',
+        unit: 'p/therm',
+        price: 94.65,
+        change: +2.85,
+        changePct: +3.10,
+        peakPrice: 96.20,
+        offPeakPrice: 91.80,
+        twoHrSpread: null,
+        color: '#f59e0b',
+        badgeBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+        subtitle: 'ICE UK Natural Gas Front Month Futures (p/therm) — Thermal marginal cost driver',
+        intraday: [
+          { label: '08:00', price: 91.80 },
+          { label: '09:00', price: 92.35 },
+          { label: '10:00', price: 93.10 },
+          { label: '11:00', price: 92.90 },
+          { label: '12:00', price: 93.60 },
+          { label: '13:00', price: 94.15 },
+          { label: '14:00', price: 95.40 },
+          { label: '15:00', price: 96.20 },
+          { label: '16:00', price: 95.10 },
+          { label: '17:00', price: 94.65 }
+        ],
+        trend7d: [
+          { label: 'Wed', price: 89.40 },
+          { label: 'Thu', price: 90.15 },
+          { label: 'Fri', price: 91.20 },
+          { label: 'Sat', price: 91.20 },
+          { label: 'Sun', price: 91.20 },
+          { label: 'Mon', price: 91.80 },
+          { label: 'Today', price: 94.65 }
+        ]
+      },
+      brent: {
+        id: 'brent',
+        name: 'ICE Brent Crude',
+        shortName: 'ICE Brent',
+        market: 'Global Benchmark',
+        unit: '$/bbl',
+        price: 74.82,
+        change: -0.94,
+        changePct: -1.24,
+        peakPrice: 76.10,
+        offPeakPrice: 74.35,
+        twoHrSpread: null,
+        color: '#a78bfa',
+        badgeBg: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+        subtitle: 'ICE Brent Crude Front Month Futures ($/bbl) — Macro energy complex anchor',
+        intraday: [
+          { label: '08:00', price: 75.76 },
+          { label: '09:00', price: 75.95 },
+          { label: '10:00', price: 76.10 },
+          { label: '11:00', price: 75.60 },
+          { label: '12:00', price: 75.30 },
+          { label: '13:00', price: 75.05 },
+          { label: '14:00', price: 74.65 },
+          { label: '15:00', price: 74.35 },
+          { label: '16:00', price: 74.70 },
+          { label: '17:00', price: 74.82 }
+        ],
+        trend7d: [
+          { label: 'Wed', price: 76.40 },
+          { label: 'Thu', price: 76.85 },
+          { label: 'Fri', price: 75.90 },
+          { label: 'Sat', price: 75.90 },
+          { label: 'Sun', price: 75.90 },
+          { label: 'Mon', price: 75.76 },
+          { label: 'Today', price: 74.82 }
+        ]
+      }
+    };
+
+    const INTELLIGENCE_ITEMS = [
+      {
+        id: 'ie-1',
+        region: 'IE',
+        regionLabel: 'Ireland (SEM)',
+        category: 'Policy',
+        source: 'CRU / SEMC',
+        time: '2h ago',
+        title: 'SEMC Publishes Consultation on Long-Duration Energy Storage (LDES) & CRM De-Rating Factors',
+        summary: 'Proposed revisions to Capacity Remuneration Mechanism (CRM) de-rating curves aim to reward 4-hour+ BESS assets ahead of the T-4 2029/30 auction.',
+        context: 'The Single Electricity Market Committee (SEMC) has issued its latest consultation paper evaluating updated de-rating factors for battery storage durations between 2 hours and 8 hours. Increasing wind penetration on the All-Island grid has heightened multi-hour ramping requirements during low-wind winter evening peaks.',
+        takeaway: 'Review portfolio augmentation economics for existing 1hr/2hr Irish BESS sites—higher CRM capacity payments for 4hr+ durations could materially improve contracted floor revenues in upcoming T-4 auctions.',
+        url: 'https://www.cru.ie/regulations-policy/energy/electricity/'
+      },
+      {
+        id: 'ie-2',
+        region: 'IE',
+        regionLabel: 'Ireland (SEM)',
+        category: 'Policy',
+        source: 'EirGrid',
+        time: '4h ago',
+        title: 'EirGrid Confirms Pathway to 80% SNSP Limit & New Synchronous Condenser Procurement',
+        summary: 'Operational trials to raise the System Non-Synchronous Penetration ceiling from 75% to 80% will unlock significant wind & solar curtailment reductions.',
+        context: 'EirGrid and SONI have outlined technical milestones for lifting the All-Island SNSP operational cap to 80%. Dispatch-down rates in 2025/26 reached record highs in Donegal and Mayo; raising the SNSP limit directly expands the headroom for renewable generation before curtailment triggers.',
+        takeaway: 'Model lower curtailment assumptions for merchant and RESS-backed wind/solar PPAs in northern and western nodes, while monitoring potential cannibalization of negative-price BESS charging windows.',
+        url: 'https://www.eirgrid.ie/grid/grid-development'
+      },
+      {
+        id: 'gb-1',
+        region: 'GB',
+        regionLabel: 'Great Britain',
+        category: 'Policy',
+        source: 'Ofgem / NESO',
+        time: '3h ago',
+        title: 'NESO Advances Gate 2 Grid Connection Queue Reform: Readiness Criteria Tightened for 2026',
+        summary: 'Projects lacking land rights and planning milestones face reordering under TMO4+ reforms, clearing stalled capacity for shovel-ready GB BESS.',
+        context: 'The National Energy System Operator (NESO) has finalized implementation guidance for the Connections Reform package. Zombie projects in the transmission queue will be deprioritized in favor of projects meeting Gate 2 readiness criteria aligned with Clean Power 2030 pathways.',
+        takeaway: 'Accelerate land and planning verification across GB development pipelines immediately; shovel-ready BESS projects in constrained zones stand to gain multi-year connection date accelerations.',
+        url: 'https://www.neso.energy/industry-information/connections'
+      },
+      {
+        id: 'ie-3',
+        region: 'IE',
+        regionLabel: 'Ireland (SEM)',
+        category: 'M&A',
+        source: 'Energy Storage News',
+        time: '5h ago',
+        title: 'European Infrastructure Fund Acquires 180 MW Irish BESS & Co-Located Solar Portfolio',
+        summary: 'Transaction values late-stage Leinster and Munster storage assets at competitive EV/MW multiples backed by multi-year route-to-market floor contracts.',
+        context: 'Institutional capital continues to target Irish grid-scale storage as DS3 contracts transition toward Future Arrangements System Services (FASS) and wholesale arbitrage spreads widen across SEMOpx Day-Ahead and Intraday markets.',
+        takeaway: 'Strong appetite from core-plus infrastructure buyers confirms resilient valuations for Irish BESS platforms that pair physical assets with sophisticated 24/7 algorithmic trading desks.',
+        url: 'https://www.energy-storage.news/'
+      },
+      {
+        id: 'gb-2',
+        region: 'GB',
+        regionLabel: 'Great Britain',
+        category: 'Development',
+        source: 'Current± News',
+        time: '6h ago',
+        title: '100 MW / 200 MWh BESS Energized Adjacent to B6 Anglo-Scottish Boundary Constraint',
+        summary: 'New 2-hour grid-forming battery enters commercial dispatch in NESO Balancing Mechanism to capture Scottish wind constraint spreads.',
+        context: 'Positioned directly south of the critical B6 transmission boundary, the 200 MWh facility will utilize NESO’s Open Balancing Platform (OBP) bulk dispatch functionality to absorb excess Scottish wind generation and discharge into southern demand centers.',
+        takeaway: 'Track Balancing Mechanism skip-rate improvements on OBP—2-hour assets near B6 and B7a boundaries are seeing a structural uptick in bid-offer acceptance volumes.',
+        url: 'https://www.current-news.co.uk/'
+      },
+      {
+        id: 'ie-4',
+        region: 'IE',
+        regionLabel: 'Ireland (SEM)',
+        category: 'Development',
+        source: 'SEMOpx',
+        time: '8h ago',
+        title: 'Greenlink Interconnector Commercial Flows Tighten I-SEM vs GB Day-Ahead Spreads',
+        summary: 'Increased 500 MW HVDC capacity between Wexford and Pembrokeshire reshapes overnight wind export dynamics and evening peak price convergence.',
+        context: 'With Greenlink operating alongside EWIC and Moyle, total Ireland-GB interconnection capacity now exceeds 1.5 GW. Cross-border coupling in the SEMOpx and EPEX Day-Ahead auctions is increasingly synchronizing evening scarcity pricing.',
+        takeaway: 'Adjust cross-border power trading strategies to account for tighter I-SEM/GB evening spreads while exploiting intraday wind forecast error volatility on the Irish side.',
+        url: 'https://www.semopx.com/markets/market-updates/'
+      }
+    ];
+
+    // --- STATE ---
+    let state = {
+      activeView: 'all',          // 'all' | 'commodities' | 'news' | 'regulation'
+      selectedCommodity: 'semopx',
+      timeframe: 'intraday',      // 'intraday' | '7d'
+      showWindOverlay: true,
+      comparePower: false,
+      regionFilter: 'ALL',        // 'ALL' | 'IE' | 'GB'
+      categoryFilter: 'ALL',      // 'ALL' | 'Policy' | 'M&A' | 'Development'
+      onlySaved: false,
+      savedIds: new Set(['ie-1', 'gb-1']),
+      activeModalItem: null
+    };
+
+    // --- RENDER FUNCTIONS ---
+    function renderKPIs() {
+      const grid = document.getElementById('kpi-grid');
+      grid.innerHTML = Object.values(COMMODITIES).map(item => {
+        const isSelected = state.selectedCommodity === item.id;
+        const isUp = item.change >= 0;
+        const borderClass = isSelected
+          ? 'border-emerald-500/70 bg-slate-900/95 ring-1 ring-emerald-500/30'
+          : 'border-slate-800/90 bg-[#0e1525] hover:border-slate-700';
+
+        return `
+          <button onclick="selectCommodity('${item.id}')" class="text-left p-4 rounded-xl border transition-all ${borderClass} flex flex-col justify-between gap-3">
+            <div class="flex items-start justify-between gap-2 w-full">
+              <div>
+                <span class="text-[11px] font-medium text-slate-400 block">${item.market}</span>
+                <h3 class="text-sm font-bold text-white mt-0.5">${item.name}</h3>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[11px] font-semibold tabular-nums ${isUp ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+                ${isUp ? '+' : ''}${item.changePct.toFixed(2)}%
+              </span>
+            </div>
+
+            <div class="flex items-baseline justify-between w-full">
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-2xl font-extrabold text-white tabular-nums">${item.price.toFixed(2)}</span>
+                <span class="text-xs font-medium text-slate-400">${item.unit}</span>
+              </div>
+              <span class="text-xs font-medium tabular-nums ${isUp ? 'text-emerald-400' : 'text-rose-400'}">
+                ${isUp ? '▲' : '▼'} ${Math.abs(item.change).toFixed(2)}
+              </span>
+            </div>
+
+            <div class="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 w-full tabular-nums">
+              <span>Range: ${item.offPeakPrice.toFixed(1)} – ${item.peakPrice.toFixed(1)}</span>
+              ${item.twoHrSpread
+                ? `<span class="text-emerald-400 font-medium">2h Spread: ${item.twoHrSpread.toFixed(1)}</span>`
+                : `<span>ICE Front Month</span>`}
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderGridTelemetryBanner() {
+      const container = document.getElementById('grid-telemetry-banner');
+      if (state.comparePower) {
+        container.innerHTML = '';
+        return;
+      }
+
+      if (state.selectedCommodity === 'semopx') {
+        container.innerHTML = `
+          <div class="rounded-xl bg-gradient-to-r from-emerald-950/50 via-[#0e1525] to-sky-950/40 border border-emerald-500/25 p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <i data-lucide="activity" class="w-5 h-5 text-emerald-400"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-bold text-white">EirGrid / SONI Smart Grid Telemetry (All-Island)</h3>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">I-SEM Live Feed</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Real-time wind, solar &amp; SNSP metrics driving SEMOpx curtailment &amp; BESS charge windows</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 text-xs tabular-nums">
+              <div class="bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-800">
+                <span class="text-slate-400 block text-[11px]">All-Island Wind</span>
+                <span class="text-sm font-bold text-sky-400">2,465 MW <span class="text-[11px] font-normal text-slate-400">(51%)</span></span>
+              </div>
+              <div class="bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-800">
+                <span class="text-slate-400 block text-[11px]">Midday Solar Peak</span>
+                <span class="text-sm font-bold text-amber-400">820 MW</span>
+              </div>
+              <div class="bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-800">
+                <span class="text-slate-400 block text-[11px]">Current SNSP</span>
+                <span class="text-sm font-bold text-emerald-400">68.4% <span class="text-[11px] font-normal text-slate-400">/ 75% Cap</span></span>
+              </div>
+              <div class="bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-800">
+                <span class="text-slate-400 block text-[11px]">Curtailment Risk</span>
+                <span class="text-sm font-bold text-amber-300">Moderate (02:00–05:00)</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (state.selectedCommodity === 'epex') {
+        container.innerHTML = `
+          <div class="rounded-xl bg-gradient-to-r from-sky-950/50 via-[#0e1525] to-indigo-950/40 border border-sky-500/25 p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center shrink-0">
+                <i data-lucide="radio" class="w-5 h-5 text-sky-400"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-bold text-white">NESO Control Room Telemetry (Great Britain)</h3>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30">GB Grid Live</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">GB wind, solar &amp; B6 boundary constraint metrics shaping EPEX DA &amp; Balancing Mechanism</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 text-xs tabular-nums">
+              <div class="bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-800">
+                <span class="text-slate-400 block text-[11px]">GB Wind Output</span>
+                <span class="text-sm font-bold text-sky-400">11,075 MW <span class="text-[11px] font-normal text-slate-400">(34%)</span></span>
+              </div>
+              <div class="bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-800">
+                <span class="text-slate-400 block text-[11px]">Midday Solar Peak</span>
+                <span class="text-sm font-bold text-amber-400">7,450 MW</span>
+              </div>
+              <div class="bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-800">
+                <span class="text-slate-400 block text-[11px]">Grid Carbon Intensity</span>
+                <span class="text-sm font-bold text-emerald-400">128 gCO₂/kWh</span>
+              </div>
+              <div class="bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-800">
+                <span class="text-slate-400 block text-[11px]">B6 Boundary Status</span>
+                <span class="text-sm font-bold text-amber-300">Active Constraint (1.4 GW)</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = '';
+      }
+    }
+
+    function renderChart() {
+      const item = COMMODITIES[state.selectedCommodity];
+      const isPower = item.id === 'semopx' || item.id === 'epex';
+      const series = state.timeframe === 'intraday' ? item.intraday : item.trend7d;
+
+      document.getElementById('chart-title').textContent = state.comparePower
+        ? 'SEMOpx (€/MWh) vs EPEX GB (£/MWh) Power Spread'
+        : `${item.name} ${state.timeframe === 'intraday' ? 'Hourly Clearing Curve' : '7-Day Settlement Trend'}`;
+
+      const badge = document.getElementById('chart-badge');
+      badge.textContent = state.comparePower ? 'Cross-Border Power' : item.market;
+      badge.className = `px-2 py-0.5 rounded text-xs font-medium border ${state.comparePower ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20' : item.badgeBg}`;
+
+      document.getElementById('chart-subtitle').textContent = state.comparePower
+        ? 'Direct hourly clearing comparison across I-SEM and Great Britain auctions'
+        : item.subtitle;
+
+      const windBtn = document.getElementById('toggle-wind');
+      if (isPower && !state.comparePower) {
+        windBtn.classList.remove('hidden');
+        windBtn.className = state.showWindOverlay
+          ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-sky-500/15 text-sky-300 border-sky-500/30 transition-colors'
+          : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200 transition-colors';
+      } else {
+        windBtn.classList.add('hidden');
+      }
+
+      const cmpBtn = document.getElementById('toggle-compare');
+      cmpBtn.className = state.comparePower
+        ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-indigo-500/15 text-indigo-300 border-indigo-500/30 transition-colors'
+        : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200 transition-colors';
+
+      const width = 960;
+      const height = 290;
+      const pad = { top: 24, right: 56, bottom: 34, left: 52 };
+      const plotW = width - pad.left - pad.right;
+      const plotH = height - pad.top - pad.bottom;
+
+      let primaryData = series.map(d => d.price);
+      let secondaryData = null;
+
+      if (state.comparePower) {
+        const semoSeries = state.timeframe === 'intraday' ? COMMODITIES.semopx.intraday : COMMODITIES.semopx.trend7d;
+        const epexSeries = state.timeframe === 'intraday' ? COMMODITIES.epex.intraday : COMMODITIES.epex.trend7d;
+        primaryData = semoSeries.map(d => d.price);
+        secondaryData = epexSeries.map(d => d.price);
+      }
+
+      const allPrices = secondaryData ? [...primaryData, ...secondaryData] : primaryData;
+      const minP = Math.floor(Math.min(...allPrices) * 0.9);
+      const maxP = Math.ceil(Math.max(...allPrices) * 1.08);
+      const rangeP = Math.max(maxP - minP, 1);
+
+      const getX = idx => pad.left + (idx / (series.length - 1)) * plotW;
+      const getY = val => pad.top + plotH - ((val - minP) / rangeP) * plotH;
+
+      const yTicks = 5;
+      let gridSvg = '';
+      for (let i = 0; i <= yTicks; i++) {
+        const val = minP + (rangeP * i) / yTicks;
+        const y = getY(val);
+        gridSvg += `
+          <line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#1e293b" stroke-dasharray="3 3" />
+          <text x="${pad.left - 10}" y="${y + 4}" text-anchor="end" fill="#64748b" font-size="11">${val.toFixed(0)}</text>
+        `;
+      }
+
+      let overlaySvg = '';
+      if (isPower && !state.comparePower && state.showWindOverlay && series[0].wind !== undefined) {
+        const maxGen = Math.max(...series.map(d => (d.wind || 0) + (d.solar || 0))) * 1.15;
+        const barW = Math.min(26, (plotW / series.length) * 0.48);
+
+        series.forEach((d, idx) => {
+          const cx = getX(idx);
+          const windH = ((d.wind || 0) / maxGen) * plotH;
+          const solarH = ((d.solar || 0) / maxGen) * plotH;
+          const windY = pad.top + plotH - windH;
+          const solarY = windY - solarH;
+
+          overlaySvg += `
+            <rect x="${cx - barW / 2}" y="${windY}" width="${barW}" height="${windH}" rx="2" fill="#38bdf8" fill-opacity="0.18" />
+            ${solarH > 0 ? `<rect x="${cx - barW / 2}" y="${solarY}" width="${barW}" height="${solarH}" rx="2" fill="#fbbf24" fill-opacity="0.28" />` : ''}
+          `;
+        });
+
+        [0, 0.5, 1].forEach(frac => {
+          const mwVal = Math.round(maxGen * frac);
+          const y = pad.top + plotH - frac * plotH;
+          overlaySvg += `<text x="${width - pad.right + 10}" y="${y + 4}" text-anchor="start" fill="#38bdf8" fill-opacity="0.7" font-size="10">${mwVal} MW</text>`;
+        });
+      }
+
+      const mainColor = state.comparePower ? '#10b981' : item.color;
+      const points = primaryData.map((val, idx) => `${getX(idx)},${getY(val)}`);
+      const linePath = `M ${points.join(' L ')}`;
+      const areaPath = `${linePath} L ${getX(primaryData.length - 1)},${pad.top + plotH} L ${getX(0)},${pad.top + plotH} Z`;
+
+      let secondaryPathSvg = '';
+      if (secondaryData) {
+        const secPoints = secondaryData.map((val, idx) => `${getX(idx)},${getY(val)}`);
+        secondaryPathSvg = `
+          <path d="M ${secPoints.join(' L ')}" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="5 3" />
+          ${secondaryData.map((val, idx) => `<circle cx="${getX(idx)}" cy="${getY(val)}" r="3.5" fill="#0e1525" stroke="#38bdf8" stroke-width="2" />`).join('')}
+        `;
+      }
+
+      let xLabelsSvg = '';
+      let hoverZonesSvg = '';
+      const zoneW = plotW / series.length;
+
+      series.forEach((d, idx) => {
+        const x = getX(idx);
+        xLabelsSvg += `<text x="${x}" y="${height - 10}" text-anchor="middle" fill="#94a3b8" font-size="11">${d.label}</text>`;
+        hoverZonesSvg += `
+          <rect x="${x - zoneW / 2}" y="${pad.top}" width="${zoneW}" height="${plotH}" fill="transparent" class="cursor-crosshair"
+            onclick="showChartTooltip(event, ${idx})" onmousemove="showChartTooltip(event, ${idx})" onmouseleave="hideChartTooltip()" />
+        `;
+      });
+
+      document.getElementById('chart-container').innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-[250px] sm:h-[270px] min-w-[600px] select-none overflow-visible">
+          <defs>
+            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${mainColor}" stop-opacity="0.28" />
+              <stop offset="100%" stop-color="${mainColor}" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          ${gridSvg}
+          ${overlaySvg}
+          <path d="${areaPath}" fill="url(#areaGrad)" />
+          <path d="${linePath}" fill="none" stroke="${mainColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          ${secondaryPathSvg}
+          ${primaryData.map((val, idx) => `<circle cx="${getX(idx)}" cy="${getY(val)}" r="4" fill="#0e1525" stroke="${mainColor}" stroke-width="2.5" />`).join('')}
+          ${xLabelsSvg}
+          ${hoverZonesSvg}
+        </svg>
+      `;
+
+      const legendEl = document.getElementById('chart-legend');
+      if (state.comparePower) {
+        legendEl.innerHTML = `
+          <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 bg-emerald-400 inline-block"></span> SEMOpx DA (€/MWh)</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 bg-sky-400 inline-block"></span> EPEX GB DA (£/MWh)</span>
+        `;
+      } else {
+        legendEl.innerHTML = `
+          <span class="inline-flex items-center gap-1.5"><span class="w-3 h-0.5 inline-block" style="background:${mainColor}"></span> ${item.name} (${item.unit})</span>
+          ${(isPower && state.showWindOverlay) ? `
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-sky-400/40 inline-block"></span> Wind Gen (MW)</span>
+            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-amber-400/50 inline-block"></span> Solar Gen (MW)</span>
+          ` : ''}
+        `;
+      }
+
+      const spreadEl = document.getElementById('bess-spread-summary');
+      if (isPower) {
+        spreadEl.innerHTML = `
+          <span>Off-Peak Low: <strong class="text-white">${item.offPeakPrice.toFixed(2)}</strong></span>
+          <span>Evening Peak: <strong class="text-white">${item.peakPrice.toFixed(2)}</strong></span>
+          <span class="text-emerald-400">2h BESS Capture Spread: <strong>${item.twoHrSpread.toFixed(2)} ${item.unit}</strong></span>
+        `;
+      } else {
+        spreadEl.innerHTML = `
+          <span>Session Low: <strong class="text-white">${item.offPeakPrice.toFixed(2)} ${item.unit}</strong></span>
+          <span>Session High: <strong class="text-white">${item.peakPrice.toFixed(2)} ${item.unit}</strong></span>
+        `;
+      }
+    }
+
+    function showChartTooltip(evt, idx) {
+      const tooltip = document.getElementById('chart-tooltip');
+      const item = COMMODITIES[state.selectedCommodity];
+      const series = state.timeframe === 'intraday' ? item.intraday : item.trend7d;
+      const point = series[idx];
+      if (!point) return;
+
+      if (state.comparePower) {
+        const semoPt = (state.timeframe === 'intraday' ? COMMODITIES.semopx.intraday : COMMODITIES.semopx.trend7d)[idx];
+        const epexPt = (state.timeframe === 'intraday' ? COMMODITIES.epex.intraday : COMMODITIES.epex.trend7d)[idx];
+        tooltip.innerHTML = `
+          <div class="font-bold text-white mb-1.5 border-b border-slate-800 pb-1">${semoPt.label}</div>
+          <div class="flex justify-between gap-4 text-emerald-400"><span>SEMOpx DA:</span><strong class="tabular-nums">€${semoPt.price.toFixed(2)}</strong></div>
+          <div class="flex justify-between gap-4 text-sky-400 mt-0.5"><span>EPEX GB DA:</span><strong class="tabular-nums">£${epexPt.price.toFixed(2)}</strong></div>
+        `;
+      } else {
+        tooltip.innerHTML = `
+          <div class="font-bold text-white mb-1.5 border-b border-slate-800 pb-1">${point.label} — ${item.shortName}</div>
+          <div class="flex justify-between gap-4 text-slate-200"><span>Price:</span><strong class="tabular-nums">${point.price.toFixed(2)} ${item.unit}</strong></div>
+          ${point.wind !== undefined ? `<div class="flex justify-between gap-4 text-sky-400 mt-0.5"><span>Wind Output:</span><strong class="tabular-nums">${point.wind.toLocaleString()} MW</strong></div>` : ''}
+          ${point.solar !== undefined ? `<div class="flex justify-between gap-4 text-amber-400 mt-0.5"><span>Solar Output:</span><strong class="tabular-nums">${point.solar.toLocaleString()} MW</strong></div>` : ''}
+        `;
+      }
+
+      const containerRect = document.getElementById('chart-container').getBoundingClientRect();
+      const relX = evt.clientX - containerRect.left;
+      const leftPos = Math.min(Math.max(relX - 95, 8), containerRect.width - 210);
+      tooltip.style.left = `${leftPos}px`;
+      tooltip.style.top = `12px`;
+      tooltip.classList.remove('hidden');
+    }
+
+    function hideChartTooltip() {
+      document.getElementById('chart-tooltip').classList.add('hidden');
+    }
+
+    function getCategoryStyle(cat) {
+      if (cat === 'Policy') return 'bg-violet-500/15 text-violet-300 border-violet-500/30';
+      if (cat === 'M&A') return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+      return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+    }
+
+    function renderIntelligence() {
+      const grid = document.getElementById('intelligence-grid');
+      document.getElementById('saved-count').textContent = state.savedIds.size;
+
+      const filtered = INTELLIGENCE_ITEMS.filter(item => {
+        if (state.activeView === 'regulation' && item.category !== 'Policy') return false;
+        if (state.activeView === 'news' && item.category === 'Policy') return false;
+        if (state.regionFilter !== 'ALL' && item.region !== state.regionFilter) return false;
+        if (state.categoryFilter !== 'ALL' && item.category !== state.categoryFilter) return false;
+        if (state.onlySaved && !state.savedIds.has(item.id)) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full p-10 rounded-xl bg-[#0e1525] border border-slate-800 text-center space-y-2">
+            <p class="text-sm font-semibold text-slate-300">No intelligence briefings match your active filters.</p>
+            <p class="text-xs text-slate-500">Reset your region, topic, or Briefcase filters to view all daily items.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(item => {
+        const isSaved = state.savedIds.has(item.id);
+        return `
+          <article onclick="openBriefingModal('${item.id}')" class="group cursor-pointer rounded-xl bg-[#0e1525] border border-slate-800/90 hover:border-emerald-500/50 p-5 flex flex-col justify-between gap-4 transition-all hover:shadow-xl hover:shadow-emerald-950/20">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                    ${item.regionLabel}
+                  </span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${getCategoryStyle(item.category)}">
+                    ${item.category}
+                  </span>
+                </div>
+                <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+                  <button onclick="toggleSave('${item.id}')" title="Save to Briefcase" class="p-1.5 rounded-lg hover:bg-slate-800 transition-colors ${isSaved ? 'text-amber-400' : 'text-slate-500 hover:text-slate-300'}">
+                    <i data-lucide="bookmark" class="w-4 h-4 ${isSaved ? 'fill-amber-400' : ''}"></i>
+                  </button>
+                  <a href="${item.url}" target="_blank" rel="noopener noreferrer" title="Open Source Website" class="p-1.5 rounded-lg text-slate-500 hover:text-emerald-400 hover:bg-slate-800 transition-colors">
+                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                  </a>
+                </div>
+              </div>
+
+              <h3 class="text-sm sm:text-[15px] font-bold text-white group-hover:text-emerald-300 transition-colors leading-snug">
+                ${item.title}
+              </h3>
+
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">
+                ${item.summary}
+              </p>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+              <span class="font-medium text-slate-400">${item.source} • ${item.time}</span>
+              <span class="text-emerald-400 font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+                Executive Brief <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </span>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function updateViewVisibility() {
+      const commSec = document.getElementById('commodities-section');
+      const intelSec = document.getElementById('intelligence-section');
+      const feedHeading = document.getElementById('feed-heading').querySelector('span');
+
+      document.querySelectorAll('.view-btn').forEach(btn => {
+        const active = btn.dataset.view === state.activeView;
+        btn.className = active
+          ? 'view-btn flex-1 sm:flex-initial px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-slate-800 text-white shadow-sm whitespace-nowrap'
+          : 'view-btn flex-1 sm:flex-initial px-3 py-1.5 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-slate-200 whitespace-nowrap';
+      });
+
+      if (state.activeView === 'all') {
+        commSec.classList.remove('hidden');
+        intelSec.classList.remove('hidden');
+        feedHeading.textContent = 'CCO Market & Regulatory Intelligence';
+      } else if (state.activeView === 'commodities') {
+        commSec.classList.remove('hidden');
+        intelSec.classList.add('hidden');
+      } else if (state.activeView === 'news') {
+        commSec.classList.add('hidden');
+        intelSec.classList.remove('hidden');
+        feedHeading.textContent = 'Industry News: Renewables & Storage M&A / Development';
+      } else if (state.activeView === 'regulation') {
+        commSec.classList.add('hidden');
+        intelSec.classList.remove('hidden');
+        feedHeading.textContent = 'Regulatory & Grid Code Intelligence (CRU, SEMC, Ofgem, NESO)';
+      }
+
+      renderIntelligence();
+    }
+
+    // --- INTERACTIVE HANDLERS ---
+    function selectCommodity(id) {
+      state.selectedCommodity = id;
+      state.comparePower = false;
+      renderKPIs();
+      renderGridTelemetryBanner();
+      renderChart();
+      lucide.createIcons();
+    }
+
+    function toggleSave(id) {
+      if (state.savedIds.has(id)) {
+        state.savedIds.delete(id);
+      } else {
+        state.savedIds.add(id);
+      }
+      renderIntelligence();
+    }
+
+    function openBriefingModal(id) {
+      const item = INTELLIGENCE_ITEMS.find(i => i.id === id);
+      if (!item) return;
+      state.activeModalItem = item;
+
+      document.getElementById('modal-badges').innerHTML = `
+        <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">${item.regionLabel}</span>
+        <span class="px-2.5 py-0.5 rounded text-xs font-semibold border ${getCategoryStyle(item.category)}">${item.category}</span>
+      `;
+      document.getElementById('modal-title').textContent = item.title;
+      document.getElementById('modal-meta').textContent = `Source: ${item.source} • Published ${item.time}`;
+      document.getElementById('modal-context').textContent = item.context;
+      document.getElementById('modal-takeaway').textContent = item.takeaway;
+
+      const urlLink = document.getElementById('modal-url-link');
+      urlLink.href = item.url;
+      urlLink.textContent = item.url;
+
+      const openBtn = document.getElementById('open-source-btn');
+      openBtn.href = item.url;
+
+      document.getElementById('copy-url-label').textContent = 'Copy Link';
+      document.getElementById('briefing-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeBriefingModal() {
+      document.getElementById('briefing-modal').classList.add('hidden');
+      state.activeModalItem = null;
+    }
+
+    // --- EVENT LISTENERS ---
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.activeView = btn.dataset.view;
+        updateViewVisibility();
+      });
+    });
+
+    document.getElementById('tf-intraday').addEventListener('click', () => {
+      state.timeframe = 'intraday';
+      document.getElementById('tf-intraday').className = 'px-2.5 py-1 rounded text-xs font-medium bg-slate-800 text-white';
+      document.getElementById('tf-7d').className = 'px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200';
+      renderChart();
+    });
+
+    document.getElementById('tf-7d').addEventListener('click', () => {
+      state.timeframe = '7d';
+      document.getElementById('tf-7d').className = 'px-2.5 py-1 rounded text-xs font-medium bg-slate-800 text-white';
+      document.getElementById('tf-intraday').className = 'px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200';
+      renderChart();
+    });
+
+    document.getElementById('toggle-wind').addEventListener('click', () => {
+      state.showWindOverlay = !state.showWindOverlay;
+      renderChart();
+    });
+
+    document.getElementById('toggle-compare').addEventListener('click', () => {
+      state.comparePower = !state.comparePower;
+      renderGridTelemetryBanner();
+      renderChart();
+      lucide.createIcons();
+    });
+
+    document.querySelectorAll('.region-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.regionFilter = btn.dataset.region;
+        document.querySelectorAll('.region-btn').forEach(b => {
+          b.className = b.dataset.region === state.regionFilter
+            ? 'region-btn px-2.5 py-1 rounded text-xs font-medium bg-slate-800 text-white'
+            : 'region-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200';
+        });
+        renderIntelligence();
+      });
+    });
+
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.categoryFilter = btn.dataset.cat;
+        document.querySelectorAll('.cat-btn').forEach(b => {
+          b.className = b.dataset.cat === state.categoryFilter
+            ? 'cat-btn px-2.5 py-1 rounded text-xs font-medium bg-slate-800 text-white'
+            : 'cat-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-slate-200';
+        });
+        renderIntelligence();
+      });
+    });
+
+    document.getElementById('saved-filter-btn').addEventListener('click', () => {
+      state.onlySaved = !state.onlySaved;
+      const btn = document.getElementById('saved-filter-btn');
+      btn.className = state.onlySaved
+        ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30 transition-colors'
+        : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200 transition-colors';
+      renderIntelligence();
+    });
+
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+      const icon = document.getElementById('refresh-icon');
+      icon.classList.add('animate-spin');
+      setTimeout(() => {
+        icon.classList.remove('animate-spin');
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('last-sync-time').textContent = `${hh}:${mm} GMT • Synced`;
+      }, 500);
+    });
+
+    document.getElementById('close-modal-btn').addEventListener('click', closeBriefingModal);
+    document.getElementById('briefing-modal').addEventListener('click', e => {
+      if (e.target.id === 'briefing-modal') closeBriefingModal();
+    });
+
+    document.getElementById('copy-url-btn').addEventListener('click', () => {
+      if (!state.activeModalItem) return;
+      navigator.clipboard?.writeText(state.activeModalItem.url);
+      document.getElementById('copy-url-label').textContent = 'Copied!';
+      setTimeout(() => {
+        document.getElementById('copy-url-label').textContent = 'Copy Link';
+      }, 2000);
+    });
+
+    // --- INIT ---
+    renderKPIs();
+    renderGridTelemetryBanner();
+    renderChart();
+    renderIntelligence();
+    lucide.createIcons();
+  </script>
+</body>
+</html>
